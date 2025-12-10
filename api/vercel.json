@@ -1,5 +1,0 @@
-{
-  "routes": [
-    { "src": "/oauth/naver/callback", "dest": "/api/naver-callback.js" }
-  ]
-}
