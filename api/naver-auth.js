@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async (req, res) => { ... }
   const clientId = process.env.NAVER_CLIENT_ID;
   const redirectUri = encodeURIComponent(process.env.NAVER_REDIRECT_URI);
   const scope = encodeURIComponent('blog.write blog.read');
