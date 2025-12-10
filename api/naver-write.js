@@ -1,5 +1,5 @@
 // /api/naver-write.js
-export default async function handler(req, res) {
+module.exports = async (req, res) => { ... }
   try {
     if (req.method !== "POST")
       return res.status(405).send("POST만 지원합니다.");
