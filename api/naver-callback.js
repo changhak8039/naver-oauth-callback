@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async (req, res) => { ... }
   try {
     const { code, state } = req.query;
     if (!code) return res.status(400).send("code 값이 없습니다.");
