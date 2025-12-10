@@ -1,15 +1,21 @@
-module.exports = async (req, res) => { ... }
-  const clientId = process.env.NAVER_CLIENT_ID;
-  const redirectUri = encodeURIComponent(process.env.NAVER_REDIRECT_URI);
-  const scope = encodeURIComponent('blog.write blog.read');
+// /api/naver-auth.js
+module.exports = async (req, res) => {
+  try {
+    const clientId = process.env.NAVER_CLIENT_ID;
+    const redirectUri = encodeURIComponent(process.env.NAVER_REDIRECT_URI);
+    const scope = encodeURIComponent('blog.write blog.read');
+    const state = Math.random().toString(36).substring(2) + Date.now().toString(36);
 
-  // 간단한 state 생성 + 쿠키 저장(테스트용)
-  const state = Math.random().toString(36).slice(2) + Date.now().toString(36);
-  res.setHeader('Set-Cookie', `naver_oauth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
+    if (!clientId || !redirectUri) {
+      throw new Error('환경변수가 누락되었습니다.');
+    }
 
-  const url =
-    `https://nid.naver.com/oauth2.0/authorize` +
-    `?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
+    const url = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
 
-  res.redirect(url);
-}
+    res.writeHead(302, { Location: url });
+    res.end();
+  } catch (err) {
+    console.error('naver-auth error:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
