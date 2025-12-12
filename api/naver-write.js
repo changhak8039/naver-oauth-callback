@@ -1,21 +1,42 @@
+// /api/naver-write.js
 export default async function handler(req, res) {
   try {
-    // 1) 토큰을 세 가지 경로에서 안전하게 수집
+    // 1️⃣ 토큰 안전하게 가져오기
     const rawAuth = req.headers.authorization || '';
     const headerToken = rawAuth.startsWith('Bearer ') ? rawAuth.slice(7) : '';
-    const token = (headerToken || req.query.access_token || req.cookies?.access_token || '')
+    const token = (
+      headerToken ||
+      req.query.access_token ||
+      req.cookies?.access_token ||
+      ''
+    )
       .toString()
       .trim();
 
-    // 2) 비ASCII(라틴-1 범위 밖) 문자가 있으면 헤더로 못 보냄
+    // 비ASCII 문자 있으면 헤더로 못 보냄
     if (!token || /[^\x00-\xFF]/.test(token)) {
       return res.status(401).json({ ok: false, error: 'NO_OR_INVALID_TOKEN' });
     }
 
-    // 3) 네이버 카테고리 호출
-    const r = await fetch('https://openapi.naver.com/blog/listCategory.json', {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}` },
+    // 2️⃣ 요청 본문 파라미터
+    const { title, contents, categoryNo = 0, tag = [] } = req.body || {};
+    const tags = Array.isArray(tag) ? tag.join(',') : tag || '';
+
+    // 3️⃣ 네이버 블로그 글쓰기 API (x-www-form-urlencoded)
+    const form = new URLSearchParams({
+      title: title || '테스트 제목',
+      contents: contents || '<p>본문 내용</p>',
+      categoryNo: categoryNo.toString(),
+      tag: tags,
+    });
+
+    const r = await fetch('https://openapi.naver.com/blog/writePost.json', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      },
+      body: form,
     });
 
     const data = await r.json();
